@@ -1,0 +1,3632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Importer Pro — DrawSQL Schema Diagram</title>
+  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --primary: #3b52d9;
+      --primary-hover: #2b3fc2;
+      --primary-glow: rgba(59, 82, 217, 0.25);
+      --success: #10b981;
+      --danger: #ef4444;
+      --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Views */
+    #setupView {
+      height: 100vh;
+      overflow-y: auto;
+      padding: 40px 20px 80px;
+      display: block;
+      background: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(59, 82, 217, 0.1);
+      border: 1px solid rgba(59, 82, 217, 0.25);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-title .icon-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .grid-host {
+      grid-template-columns: 3fr 1fr;
+    }
+
+    @media (max-width: 600px) {
+
+      .grid-2,
+      .grid-host {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"] {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+      background: #ffffff;
+    }
+
+    .conn-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      color: #334155;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e2e8f0;
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .conn-status {
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+
+    .conn-status.ok {
+      background: rgba(16, 185, 129, 0.1);
+      color: #059669;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .conn-status.err {
+      background: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .drop-zone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: #f8fafc;
+    }
+
+    .drop-zone:hover,
+    .drop-zone.over {
+      border-color: var(--primary);
+      background: rgba(59, 82, 217, 0.04);
+    }
+
+    .drop-zone.has-file {
+      border-color: var(--success);
+      background: rgba(16, 185, 129, 0.04);
+    }
+
+    .drop-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto 10px;
+      color: var(--primary);
+    }
+
+    .drop-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .drop-hint {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .file-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #059669;
+      margin-top: 10px;
+    }
+
+    .file-pill button {
+      background: transparent;
+      border: none;
+      color: #059669;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .checks {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .check-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .check-label input {
+      margin-top: 2px;
+      accent-color: var(--primary);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 14px 24px;
+      background: linear-gradient(135deg, #3b52d9 0%, #2b3fc2 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 20px var(--primary-glow);
+      transition: all 0.25s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(59, 82, 217, 0.4);
+    }
+
+    /* ====================================================
+       DRAWSQL ER DIAGRAM CANVAS VIEW (EXACT MATCH)
+       ==================================================== */
+    #diagramView {
+      display: none;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Top App Bar */
+    .drawsql-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 50;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .drawsql-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .drawsql-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 18px;
+      color: #3b52d9;
+      letter-spacing: -0.02em;
+    }
+
+    .drawsql-diagram-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      padding-left: 14px;
+      border-left: 1px solid #e2e8f0;
+    }
+
+    .tag-badge {
+      background: #e0e7ff;
+      color: #4338ca;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .drawsql-stats {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .stat-pill b {
+      color: #0f172a;
+      font-family: var(--font-mono);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-header:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-header.primary {
+      background: #3b52d9;
+      color: #ffffff;
+      border-color: #3b52d9;
+    }
+
+    .btn-header.primary:hover {
+      background: #2b3fc2;
+    }
+
+    /* Top Bar Hamburger Menu & Dropdown */
+    .header-menu-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .btn-hamburger {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .btn-hamburger:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0f172a;
+    }
+
+    .btn-hamburger.active {
+      background: #ede9fe;
+      border-color: #818cf8;
+      color: #4f46e5;
+    }
+
+    .header-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 210px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      box-shadow: 0 14px 30px -6px rgba(0, 0, 0, 0.18), 0 6px 12px -4px rgba(0, 0, 0, 0.08);
+      padding: 6px;
+      z-index: 120;
+      display: none;
+      flex-direction: column;
+      gap: 3px;
+      animation: dropPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .header-dropdown-menu.show {
+      display: flex;
+    }
+
+    .header-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 9px 13px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      color: #334155;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.12s;
+    }
+
+    .header-dropdown-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .header-dropdown-item svg {
+      flex-shrink: 0;
+      color: #64748b;
+      transition: color 0.12s;
+    }
+
+    .header-dropdown-item:hover svg {
+      color: #4f46e5;
+    }
+
+    .header-dropdown-item.primary {
+      color: #3b52d9;
+      background: #f5f7ff;
+    }
+
+    .header-dropdown-item.primary:hover {
+      background: #3b52d9;
+      color: #ffffff;
+    }
+
+    .header-dropdown-item.primary:hover svg {
+      color: #ffffff;
+    }
+
+    .header-dropdown-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 4px 0;
+    }
+
+    .error-banner {
+      position: absolute;
+      top: 66px;
+      left: 20px;
+      right: 20px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 55;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    }
+
+    .top-progress-bar {
+      position: absolute;
+      top: 59px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #e2e8f0;
+      z-index: 60;
+    }
+
+    .top-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b52d9, #10b981);
+      transition: width 0.25s ease-out;
+    }
+
+    /* Canvas World */
+    .canvas-viewport {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      cursor: grab;
+    }
+
+    .canvas-viewport:active {
+      cursor: grabbing;
+    }
+
+    .canvas-world {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      width: 14000px;
+      height: 14000px;
+    }
+
+    /* SVG Orthogonal Relationship Lines (DrawSQL Manhattan Routing) */
+    #diagramSvg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .fk-line {
+      fill: none;
+      stroke: #94a3b8;
+      stroke-width: 1.6px;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      pointer-events: stroke;
+      cursor: pointer;
+      transition: stroke 0.2s, stroke-width 0.2s;
+    }
+
+    .fk-line:hover,
+    .fk-line.highlight {
+      stroke: #3b52d9;
+      stroke-width: 2.6px;
+      stroke-dasharray: 5;
+      animation: dash 1s linear infinite;
+    }
+
+    @keyframes dash {
+      to {
+        stroke-dashoffset: -10;
+      }
+    }
+
+    .fk-dot {
+      transition: transform 0.2s;
+    }
+
+    .nodes-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 20;
+    }
+
+    /* Table Cards (Exact DrawSQL Style) */
+    .table-card {
+      position: absolute;
+      width: 240px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+      font-size: 12px;
+      cursor: move;
+      transition: box-shadow 0.2s, border-color 0.2s, opacity 0.2s;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0.85);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .table-card:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+      z-index: 30;
+    }
+
+    /* DrawSQL Focus Mode and Selection State */
+    .table-card.selected {
+      border-color: #6366f1 !important;
+      outline: 2.5px solid #6366f1 !important;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.25), 0 14px 30px rgba(15, 23, 42, 0.16) !important;
+      z-index: 38 !important;
+      opacity: 1 !important;
+    }
+
+    .table-card.connected {
+      border-color: #818cf8 !important;
+      box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.25), 0 8px 24px rgba(15, 23, 42, 0.1) !important;
+      opacity: 1 !important;
+      filter: none !important;
+      z-index: 32 !important;
+    }
+
+    .canvas-world.has-selection .table-card:not(.connected):not(.selected) {
+      opacity: 0.35;
+      filter: grayscale(0.2);
+      transition: opacity 0.2s, filter 0.2s;
+    }
+
+    .canvas-world.has-selection .fk-line:not(.active-line) {
+      opacity: 0.12;
+      stroke: #cbd5e1;
+    }
+
+    .canvas-world.has-selection .fk-dot:not(.active-dot) {
+      opacity: 0.12;
+    }
+
+    .fk-line.active-line {
+      stroke: #4f46e5 !important;
+      stroke-width: 2.8px !important;
+      opacity: 1 !important;
+      filter: drop-shadow(0 0 4px rgba(79, 70, 229, 0.45));
+    }
+
+    .fk-dot.active-dot {
+      fill: #4f46e5 !important;
+      r: 4.5 !important;
+      opacity: 1 !important;
+    }
+
+    /* Left Sidebar: DrawSQL Tables Panel */
+    .drawsql-sidebar {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      bottom: 0;
+      width: 320px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      z-index: 45;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .drawsql-sidebar.collapsed {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-header {
+      height: 48px;
+      padding: 0 14px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+    }
+
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .sidebar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sidebar-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .sidebar-btn:hover {
+      background: #f1f5f9;
+      border-color: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .sidebar-search-box {
+      padding: 8px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #f8fafc;
+    }
+
+    .sidebar-search-input {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #0f172a;
+    }
+
+    .sidebar-search-input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+    }
+
+    .sidebar-table-banner {
+      padding: 10px 14px;
+      background: #ffffff;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-table-badge {
+      background: #ede9fe;
+      color: #6d28d9;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      border: 1px solid #ddd6fe;
+    }
+
+    .sidebar-table-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sidebar-columns-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar-col-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      transition: background 0.1s;
+    }
+
+    .pill-name {
+      flex: 1.1;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-weight: 600;
+      color: #1e293b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .pill-type {
+      flex: 0.95;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #475569;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .pill-null {
+      min-width: 16px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0d9488;
+    }
+
+    .pill-icon {
+      width: 18px;
+      text-align: center;
+      font-size: 13px;
+      color: #0284c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pill-dots {
+      font-size: 11px;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .pill-dots:hover {
+      color: #0f172a;
+      background: #e2e8f0;
+    }
+
+    .col-dots-btn {
+      opacity: 0;
+      cursor: pointer;
+      font-size: 10px;
+      color: #94a3b8;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .col-row:hover .col-dots-btn {
+      opacity: 1;
+    }
+
+    .col-dots-btn:hover {
+      color: #0f172a;
+      background: #e2e8f0;
+    }
+
+    .card-dots {
+      cursor: pointer;
+      font-size: 11px;
+      color: inherit;
+      opacity: 0.75;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: opacity 0.15s, background 0.15s;
+    }
+
+    .card-dots:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    /* Floating Context Dropdown Menu */
+    .context-dropdown {
+      position: fixed;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+      min-width: 170px;
+      padding: 4px;
+      z-index: 1000;
+      display: none;
+      font-size: 13px;
+      animation: dropPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes dropPop {
+      from {
+        transform: scale(0.92);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .context-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      color: #334155;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.12s;
+    }
+
+    .context-item:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .context-item.danger {
+      color: #dc2626;
+    }
+
+    .context-item.danger:hover {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .context-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 4px 0;
+    }
+
+    /* DrawSQL View / Edit Modal Dialog */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-dialog {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+      animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlide {
+      from {
+        transform: translateY(12px) scale(0.96);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fafafa;
+    }
+
+    .modal-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-tag {
+      background: #ede9fe;
+      color: #6d28d9;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .modal-tag.edit {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .modal-header h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      line-height: 1;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .modal-content-area {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .modal-field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .modal-field input[type="text"],
+    .modal-field select {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      color: #0f172a;
+      transition: all 0.2s;
+    }
+
+    .modal-field input:focus,
+    .modal-field select:focus {
+      outline: none;
+      border-color: #6366f1;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    }
+
+    .modal-field-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #334155;
+    }
+
+    .modal-field-checkbox input {
+      accent-color: #6366f1;
+      width: 16px;
+      height: 16px;
+    }
+
+    .modal-view-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .modal-view-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .modal-view-table td:first-child {
+      font-weight: 600;
+      color: #64748b;
+      width: 38%;
+    }
+
+    .modal-view-table td:last-child {
+      color: #0f172a;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .modal-action-bar {
+      padding: 14px 20px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-cancel {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      color: #334155;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-cancel:hover {
+      background: #f1f5f9;
+    }
+
+    .btn-save {
+      background: #6366f1;
+      border: 1px solid #6366f1;
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+      transition: all 0.15s;
+    }
+
+    .btn-save:hover {
+      background: #4f46e5;
+    }
+
+    .sidebar-footer {
+      padding: 8px 14px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      font-size: 11px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-clear-sel {
+      background: #ede9fe;
+      border: 1px solid #c4b5fd;
+      color: #6d28d9;
+      font-weight: 600;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-clear-sel:hover {
+      background: #ddd6fe;
+    }
+
+    .sidebar-floating-toggle {
+      position: absolute;
+      top: 72px;
+      left: 16px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .sidebar-floating-toggle:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    .table-header {
+      padding: 8px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      border-top-left-radius: 7px;
+      border-top-right-radius: 7px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* DrawSQL Pastel Header Colors */
+    .color-red {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .color-purple {
+      background: #f3e8ff;
+      color: #6b21a8;
+    }
+
+    .color-blue {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .color-teal {
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+
+    .color-amber {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .color-pink {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .color-slate {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .color-green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .table-columns {
+      padding: 2px 0;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .col-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 25px;
+      padding: 0 12px;
+      border-bottom: 1px solid #f8fafc;
+      transition: background 0.1s;
+      position: relative;
+    }
+
+    .col-row:last-child {
+      border-bottom: none;
+    }
+
+    .col-row:hover,
+    .col-row.highlight {
+      background: #f1f5f9;
+    }
+
+    .col-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+      color: #1e293b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .col-icon {
+      font-size: 11px;
+      line-height: 1;
+      width: 14px;
+      display: inline-block;
+      text-align: center;
+      color: #64748b;
+    }
+
+    .col-icon.pk {
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .col-icon.fk {
+      color: #3b52d9;
+      font-weight: 700;
+    }
+
+    .col-type {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: #64748b;
+      margin-left: 8px;
+    }
+
+    .table-footer {
+      padding: 5px 12px;
+      background: #fafafa;
+      border-top: 1px solid #f1f5f9;
+      font-size: 11px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+      border-bottom-left-radius: 7px;
+      border-bottom-right-radius: 7px;
+    }
+
+    /* Sticky Note Component (DrawSQL Style) */
+    .sticky-note {
+      position: absolute;
+      width: 170px;
+      min-height: 110px;
+      background: #fef08a;
+      border: 1px solid #fde047;
+      border-radius: 6px;
+      padding: 14px 12px 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      font-size: 12px;
+      line-height: 1.4;
+      color: #713f12;
+      cursor: move;
+      transform: rotate(-1.5deg);
+      transition: transform 0.15s, box-shadow 0.15s;
+      z-index: 15;
+    }
+
+    .sticky-note:hover {
+      transform: rotate(0deg) scale(1.02);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      z-index: 35;
+    }
+
+    .sticky-tape {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 16px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(254, 240, 138, 0.4);
+      backdrop-filter: blur(2px);
+    }
+
+    .sticky-close {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      width: 18px;
+      height: 18px;
+      border: none;
+      background: transparent;
+      color: #854d0e;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.45;
+      transition: all 0.15s;
+    }
+    .sticky-close:hover {
+      opacity: 1;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    /* Collaborator Cursor Pills (DrawSQL Style) */
+    .user-cursor-pill {
+      position: absolute;
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      pointer-events: none;
+      z-index: 45;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      animation: floatCursor 4s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatCursor {
+      from {
+        transform: translateY(0);
+      }
+
+      to {
+        transform: translateY(-4px);
+      }
+    }
+
+    /* Group Category Container */
+    .zone-box {
+      position: absolute;
+      border-radius: 12px;
+      pointer-events: none;
+      z-index: 5;
+      transition: all 0.3s;
+    }
+
+    .zone-label {
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    /* Floating Toolbar at Bottom */
+    .drawsql-toolbar {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      gap: 2px;
+      z-index: 50;
+    }
+
+    .tool-btn {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: #475569;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .tool-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .tool-zoom-text {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      padding: 0 8px;
+    }
+
+    .tool-divider {
+      width: 1px;
+      height: 20px;
+      background: #e2e8f0;
+      margin: 0 4px;
+    }
+
+    .toast {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SETUP / UPLOAD VIEW -->
+  <div id="setupView">
+    <div class="container">
+      <header>
+        <div class="badge-top">
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zM3 16a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z" />
+          </svg>
+          Streaming Import & Visual Schema
+        </div>
+        <h1>SQL Importer Pro</h1>
+        <p class="subtitle">Upload a .sql file to immediately generate and explore your interactive DrawSQL relationship
+          diagram.</p>
+      </header>
+
+      <form id="importForm">
+        <input type="hidden" id="database" name="database" value="">
+        <input type="hidden" id="host" name="host" value="127.0.0.1">
+        <input type="hidden" id="port" name="port" value="3306">
+        <input type="hidden" id="user" name="user" value="root">
+        <input type="hidden" id="password" name="password" value="">
+
+        <!-- SQL File Upload -->
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-label">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+              SQL Dump File
+            </span>
+          </div>
+
+          <div id="dropZone" class="drop-zone">
+            <svg class="drop-icon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <div class="drop-title" id="dropTitle">Click or drag & drop your .sql file here</div>
+            <div class="drop-hint" id="dropHint">Supports .sql and .txt (up to 4 GB, streaming memory-safe)</div>
+            <div id="filePill" class="file-pill" style="display:none;">
+              <span id="fileName"></span>
+              <button type="button" id="btnRemoveFile" title="Remove file">&times;</button>
+            </div>
+          </div>
+          <input type="file" id="sqlfile" name="sqlfile" accept=".sql,.txt" hidden>
+
+          <div class="checks">
+            <label class="check-label">
+              <input type="checkbox" name="create_db" checked>
+              <span><b>Auto-create Database</b><br><small style="color:var(--text-muted)">Create database if
+                  missing</small></span>
+            </label>
+            <label class="check-label">
+              <input type="checkbox" name="force_target_db" checked>
+              <span><b>Force Target Database</b><br><small style="color:var(--text-muted)">Override USE
+                  statements</small></span>
+            </label>
+            <label class="check-label">
+              <input type="checkbox" name="fresh">
+              <span><b>Clean Reset</b><br><small style="color:var(--text-muted)">Drop existing tables
+                  first</small></span>
+            </label>
+            <label class="check-label">
+              <input type="checkbox" name="keep_going" checked>
+              <span><b>Continue On Error</b><br><small style="color:var(--text-muted)">Proceed if a statement
+                  fails</small></span>
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" id="btnImport" class="btn-primary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+          Generate Schema Diagram
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+     DRAWSQL INTERACTIVE DIAGRAM VIEW
+     ========================================== -->
+  <div id="diagramView">
+    <!-- DrawSQL Top Bar -->
+    <div class="drawsql-header">
+      <div class="drawsql-title-group">
+        <div class="drawsql-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#3b52d9">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+          SQL Importer Pro
+        </div>
+        <div class="drawsql-diagram-name">
+          <span>Diagrams / <b id="displayDbName">Smart Tourism</b></span>
+          <span class="tag-badge">Public</span>
+        </div>
+      </div>
+
+      <!-- Live Streaming Counters -->
+      <div class="drawsql-stats">
+        <div class="stat-pill">Statements: <b id="diagStatements">0</b></div>
+        <div class="stat-pill">Tables: <b id="diagTables">0</b></div>
+        <div class="stat-pill" style="border-color:#c7d2fe;background:#eef2ff;">Relationships: <b id="diagRelations"
+            style="color:#3b52d9;">0</b></div>
+        <div class="stat-pill">Time: <b id="diagTime">0.0s</b></div>
+        <div class="stat-pill" id="diagSpeedPill" style="display:none;"><b id="diagSpeed">0</b> stmts/s</div>
+        <div class="stat-pill" id="diagErrorPill" style="display:none;color:#dc2626;">Errors: <b id="diagErrors">0</b>
+        </div>
+      </div>
+
+      <!-- Header Actions Hamburger Menu -->
+      <div class="header-menu-container">
+        <button type="button" class="btn-hamburger" id="btnHeaderMenu" title="Menu" aria-label="Toggle menu">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div id="headerDropdownMenu" class="header-dropdown-menu">
+          <button type="button" class="header-dropdown-item" id="btnAddNote" title="Add a sticky note">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>Add Note</span>
+          </button>
+          <button type="button" class="header-dropdown-item" id="btnAutoLayout" title="Auto arrange all tables">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            <span>Auto Layout</span>
+          </button>
+          <button type="button" class="header-dropdown-item" id="btnFitScreen" title="Fit all tables on screen">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+            <span>Fit View</span>
+          </button>
+          <button type="button" class="header-dropdown-item" id="btnExportSvg" title="Save as image / report">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            <span>Export</span>
+          </button>
+          <div class="header-dropdown-divider"></div>
+          <button type="button" class="header-dropdown-item primary" id="btnBackToForm">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            <span>Back to Setup</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Alert Banner -->
+    <div id="errorBanner" class="error-banner">
+      <span id="errorBannerText">An error occurred</span>
+      <button type="button" id="btnDismissError"
+        style="background:transparent;border:none;font-weight:700;color:#991b1b;cursor:pointer;">Dismiss</button>
+    </div>
+
+    <!-- Top Progress Bar -->
+    <div class="top-progress-bar">
+      <div id="diagProgressFill" class="top-progress-fill"></div>
+    </div>
+
+    <!-- Interactive Pan & Zoom Canvas Viewport -->
+    <div id="canvasViewport" class="canvas-viewport">
+      <div id="canvasWorld" class="canvas-world">
+        <!-- Zones Layer (Background module boxes like Users & Trust) -->
+        <div id="zonesLayer" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
+
+        <!-- SVG Orthogonal Relationship Lines (Manhattan Routing) -->
+        <svg id="diagramSvg">
+          <defs>
+            <marker id="fk-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6"
+              orient="auto-start-reverse">
+              <path d="M 0 1 L 7 4 L 0 7 z" fill="#64748b" />
+            </marker>
+            <marker id="fk-arrow-active" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6"
+              orient="auto-start-reverse">
+              <path d="M 0 1 L 7 4 L 0 7 z" fill="#3b52d9" />
+            </marker>
+          </defs>
+        </svg>
+
+        <!-- HTML Table Nodes & Sticky Notes Layer -->
+        <div id="nodesLayer" class="nodes-layer"></div>
+      </div>
+    </div>
+
+    <!-- DrawSQL Left Sidebar: Tables & Selected Table Details -->
+    <aside id="drawsqlSidebar" class="drawsql-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+          </svg>
+          <span>Tables</span>
+        </div>
+        <div class="sidebar-actions">
+          <button type="button" class="sidebar-btn" id="btnToggleSearch" title="Search tables or columns">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </button>
+          <button type="button" class="sidebar-btn" id="btnCloseSidebar" title="Close sidebar">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Input Bar -->
+      <div id="sidebarSearchBox" class="sidebar-search-box" style="display:none;">
+        <input type="text" id="sidebarSearchInput" class="sidebar-search-input"
+          placeholder="Search tables or columns...">
+      </div>
+
+      <!-- Active Selected Table Banner (DrawSQL Lavender) -->
+      <div id="sidebarTableBanner" class="sidebar-table-banner">
+        <div class="sidebar-table-badge" id="sidebarActiveBadge">
+          <span id="sidebarActiveTableName">No table selected</span>
+        </div>
+        <div class="sidebar-table-controls">
+          <button type="button" class="sidebar-btn" id="btnFocusActiveTable" title="Center table on screen">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+              <line x1="12" y1="2" x2="12" y2="5" />
+              <line x1="12" y1="19" x2="12" y2="22" />
+              <line x1="2" y1="12" x2="5" y2="12" />
+              <line x1="19" y1="12" x2="22" y2="12" />
+            </svg>
+          </button>
+          <button type="button" class="sidebar-btn" id="btnCopyTableSql" title="Copy table name">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </button>
+          <button type="button" class="sidebar-btn" id="btnTableOptions" title="Table options">•••</button>
+        </div>
+      </div>
+
+      <!-- Columns List formatted with DrawSQL Pills -->
+      <div id="sidebarColumnsList" class="sidebar-columns-list">
+        <div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">
+          Click any table or relationship line on the canvas to inspect its schema.
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <span id="sidebarRelCount">0 relationships</span>
+        <button type="button" id="btnClearSelection" class="btn-clear-sel" style="display:none;">Show All</button>
+      </div>
+    </aside>
+
+    <!-- Floating Context Dropdown Menu for Column / Table options -->
+    <div id="contextMenuDropdown" class="context-dropdown">
+      <div class="context-item" id="ctxView">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <span>View Details</span>
+      </div>
+      <div class="context-item" id="ctxEdit">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+        </svg>
+        <span>Edit</span>
+      </div>
+      <div class="context-divider"></div>
+      <div class="context-item danger" id="ctxDelete">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          <line x1="10" y1="11" x2="10" y2="17" />
+          <line x1="14" y1="11" x2="14" y2="17" />
+        </svg>
+        <span>Delete</span>
+      </div>
+    </div>
+
+    <!-- DrawSQL View / Edit Modal Dialog -->
+    <div id="drawsqlModal" class="modal-backdrop" style="display:none;">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <span class="modal-tag" id="modalTag">VIEW</span>
+            <h3 id="modalHeading">Column Details</h3>
+          </div>
+          <button type="button" class="modal-close" id="btnModalClose">&times;</button>
+        </div>
+
+        <div class="modal-content-area" id="modalContent">
+          <!-- Injected dynamically -->
+        </div>
+
+        <div class="modal-action-bar" id="modalActions">
+          <button type="button" class="btn-cancel" id="btnModalCancel">Close</button>
+          <button type="button" class="btn-save" id="btnModalSave" style="display:none;">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Button when Sidebar is Closed -->
+    <button type="button" id="btnFloatingOpenSidebar" class="sidebar-floating-toggle" style="display:none;"
+      title="Show Tables panel">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <span>Tables</span>
+    </button>
+
+    <!-- Floating DrawSQL Control Bar -->
+    <div class="drawsql-toolbar">
+      <button type="button" class="tool-btn" id="toolSelect" title="Select mode">
+        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M4 2l16 11-7 1.5 4.5 7.5-2.5 1.5-4.5-7.5L7 19z" />
+        </svg>
+      </button>
+      <button type="button" class="tool-btn" id="toolPan" title="Pan canvas">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path
+            d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0m-4 0a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v5m-4 0a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v6a7 7 0 0 0 7 7h3a7 7 0 0 0 7-7v-5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2" />
+        </svg>
+      </button>
+      <button type="button" class="tool-btn" id="toolFit" title="Fit to Screen">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+      </button>
+      <div class="tool-divider"></div>
+      <button type="button" class="tool-btn" id="toolZoomOut" title="Zoom Out">&minus;</button>
+      <span class="tool-zoom-text" id="toolZoomVal">100%</span>
+      <button type="button" class="tool-btn" id="toolZoomIn" title="Zoom In">&plus;</button>
+      <div class="tool-divider"></div>
+      <button type="button" class="tool-btn" id="toolFullscreen" title="Toggle Fullscreen">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+        </svg>
+      </button>
+    </div>
+
+    <div id="toast" class="toast" style="display:none;"></div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const form = $('importForm');
+    const dropZone = $('dropZone');
+    const fileInput = $('sqlfile');
+    const filePill = $('filePill');
+    const fileNameSpan = $('fileName');
+    const dropTitle = $('dropTitle');
+    const dropHint = $('dropHint');
+    const btnImport = $('btnImport');
+
+    // Diagram Elements
+    const setupView = $('setupView');
+    const diagramView = $('diagramView');
+    const canvasViewport = $('canvasViewport');
+    const canvasWorld = $('canvasWorld');
+    const diagramSvg = $('diagramSvg');
+    const nodesLayer = $('nodesLayer');
+    const zonesLayer = $('zonesLayer');
+    const toolZoomVal = $('toolZoomVal');
+    const toastEl = $('toast');
+    const errorBanner = $('errorBanner');
+    const errorBannerText = $('errorBannerText');
+
+    // DrawSQL Sidebar Elements
+    const drawsqlSidebar = $('drawsqlSidebar');
+    const sidebarSearchBox = $('sidebarSearchBox');
+    const sidebarSearchInput = $('sidebarSearchInput');
+    const sidebarTableBanner = $('sidebarTableBanner');
+    const sidebarActiveTableName = $('sidebarActiveTableName');
+    const sidebarColumnsList = $('sidebarColumnsList');
+    const sidebarRelCount = $('sidebarRelCount');
+    const btnClearSelection = $('btnClearSelection');
+    const btnFloatingOpenSidebar = $('btnFloatingOpenSidebar');
+    const btnCloseSidebar = $('btnCloseSidebar');
+    const btnToggleSearch = $('btnToggleSearch');
+    const btnFocusActiveTable = $('btnFocusActiveTable');
+    const btnCopyTableSql = $('btnCopyTableSql');
+    const btnTableOptions = $('btnTableOptions');
+
+    // Floating Context Dropdown & Modal Elements
+    const contextMenuDropdown = $('contextMenuDropdown');
+    const ctxView = $('ctxView');
+    const ctxEdit = $('ctxEdit');
+    const ctxDelete = $('ctxDelete');
+
+    const drawsqlModal = $('drawsqlModal');
+    const modalTag = $('modalTag');
+    const modalHeading = $('modalHeading');
+    const modalContent = $('modalContent');
+    const btnModalClose = $('btnModalClose');
+    const btnModalCancel = $('btnModalCancel');
+    const btnModalSave = $('btnModalSave');
+
+    let currentMenuContext = null;
+
+    // DrawSQL Header Colors
+    const HEADER_COLORS = [
+      'color-red',
+      'color-teal',
+      'color-green',
+      'color-amber',
+      'color-blue',
+      'color-purple',
+      'color-pink',
+      'color-slate'
+    ];
+
+    // Canvas State
+    let scale = 0.85;
+    let panX = 80;
+    let panY = 100;
+    let isPanning = false;
+    let startX = 0;
+    let startY = 0;
+
+    // Data & Selection State
+    let tablesMap = new Map(); // table_name -> { name, columns, foreign_keys, x, y, width, height, el }
+    let relationships = [];    // [ { from_table, from_col, to_table, to_col } ]
+    let selectedTable = null;  // active table name
+    let selectedRel = null;    // active relationship object
+    let isSidebarOpen = true;
+    let currentDatabaseName = 'schema_diagram';
+    let stickyNotes = [];
+    let colorIndex = 0;
+
+    // Column layout spacing
+    const COL_WIDTH = 250;
+    const COL_GAP_X = 90;
+    const ROW_GAP_Y = 32;
+    const NUM_COLS = 5;
+    let columnHeights = new Array(NUM_COLS).fill(0);
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function updateFileDisplay() {
+      const f = fileInput.files[0];
+      if (f) {
+        dropZone.classList.add('has-file');
+        dropTitle.style.display = 'none';
+        dropHint.style.display = 'none';
+        filePill.style.display = 'inline-flex';
+        fileNameSpan.textContent = `${f.name} (${formatBytes(f.size)})`;
+
+        // Automatically derive database name from filename (e.g. smart_tourism.sql -> smart_tourism)
+        const baseName = f.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
+        currentDatabaseName = baseName || 'schema_diagram';
+        const dbEl = $('database');
+        if (dbEl) dbEl.value = currentDatabaseName;
+      } else {
+        dropZone.classList.remove('has-file');
+        dropTitle.style.display = 'block';
+        dropHint.style.display = 'block';
+        filePill.style.display = 'none';
+        fileNameSpan.textContent = '';
+        const dbEl = $('database');
+        if (dbEl) dbEl.value = '';
+      }
+    }
+
+    dropZone.onclick = (e) => {
+      if (e.target.id !== 'btnRemoveFile') fileInput.click();
+    };
+
+    $('btnRemoveFile').onclick = (e) => {
+      e.stopPropagation();
+      fileInput.value = '';
+      updateFileDisplay();
+    };
+
+    fileInput.onchange = () => {
+      updateFileDisplay();
+      if (fileInput.files && fileInput.files.length) {
+        if (form.requestSubmit) {
+          form.requestSubmit();
+        } else {
+          form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+      }
+    };
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('over'); });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('over'); });
+    });
+    dropZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        updateFileDisplay();
+        if (form.requestSubmit) {
+          form.requestSubmit();
+        } else {
+          form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+      }
+    });
+
+    function showToast(msg, duration = 3000) {
+      toastEl.textContent = msg;
+      toastEl.style.display = 'flex';
+      setTimeout(() => { toastEl.style.display = 'none'; }, duration);
+    }
+
+    function showError(msg) {
+      errorBannerText.textContent = msg;
+      errorBanner.style.display = 'flex';
+    }
+
+    $('btnDismissError').onclick = () => {
+      errorBanner.style.display = 'none';
+    };
+
+    function updateTransform() {
+      canvasWorld.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      toolZoomVal.textContent = `${Math.round(scale * 100)}%`;
+    }
+
+    // Pan & Zoom Event Listeners
+    canvasViewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.table-card, .sticky-note')) return;
+      isPanning = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isPanning) return;
+      panX = e.clientX - startX;
+      panY = e.clientY - startY;
+      updateTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isPanning = false;
+    });
+
+    canvasViewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      const newScale = Math.min(Math.max(scale * zoomFactor, 0.2), 2.5);
+
+      const rect = canvasViewport.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      panX = mouseX - (mouseX - panX) * (newScale / scale);
+      panY = mouseY - (mouseY - panY) * (newScale / scale);
+      scale = newScale;
+
+      updateTransform();
+    }, { passive: false });
+
+    $('toolZoomIn').onclick = () => {
+      scale = Math.min(scale * 1.2, 2.5);
+      updateTransform();
+    };
+    $('toolZoomOut').onclick = () => {
+      scale = Math.max(scale * 0.8, 0.2);
+      updateTransform();
+    };
+    $('toolFit').onclick = () => fitToScreen();
+    $('btnFitScreen').onclick = () => fitToScreen();
+
+    function fitToScreen() {
+      if (tablesMap.size === 0) return;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+      tablesMap.forEach((t) => {
+        minX = Math.min(minX, t.x);
+        minY = Math.min(minY, t.y);
+        maxX = Math.max(maxX, t.x + (t.width || COL_WIDTH));
+        maxY = Math.max(maxY, t.y + (t.height || 200));
+      });
+
+      const padding = 80;
+      const vpWidth = canvasViewport.clientWidth;
+      const vpHeight = canvasViewport.clientHeight - 60;
+
+      const w = maxX - minX;
+      const h = maxY - minY;
+
+      if (w <= 0 || h <= 0) return;
+
+      const scaleX = (vpWidth - padding * 2) / w;
+      const scaleY = (vpHeight - padding * 2) / h;
+      scale = Math.min(Math.max(Math.min(scaleX, scaleY), 0.25), 1.15);
+
+      panX = padding + (vpWidth - padding * 2 - w * scale) / 2 - minX * scale;
+      panY = 70 + padding + (vpHeight - padding * 2 - h * scale) / 2 - minY * scale;
+
+      updateTransform();
+    }
+
+    $('btnAutoLayout').onclick = autoLayout;
+    function autoLayout() {
+      columnHeights.fill(0);
+      let idx = 0;
+      tablesMap.forEach((t) => {
+        const col = idx % NUM_COLS;
+        const x = col * (COL_WIDTH + COL_GAP_X);
+        const y = columnHeights[col];
+
+        t.x = x;
+        t.y = y;
+        t.el.style.left = `${x}px`;
+        t.el.style.top = `${y}px`;
+
+        const h = t.el.offsetHeight || 180;
+        columnHeights[col] += h + ROW_GAP_Y;
+        idx++;
+      });
+      renderConnectors();
+      fitToScreen();
+      showToast('Tables arranged in relationship layout');
+    }
+
+    // Header Hamburger Menu Toggle
+    const btnHeaderMenu = $('btnHeaderMenu');
+    const headerDropdownMenu = $('headerDropdownMenu');
+
+    if (btnHeaderMenu && headerDropdownMenu) {
+      btnHeaderMenu.onclick = (e) => {
+        e.stopPropagation();
+        const isShown = headerDropdownMenu.classList.toggle('show');
+        btnHeaderMenu.classList.toggle('active', isShown);
+      };
+
+      // Close dropdown menu when any menu item is clicked
+      headerDropdownMenu.querySelectorAll('.header-dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+          headerDropdownMenu.classList.remove('show');
+          btnHeaderMenu.classList.remove('active');
+        });
+      });
+
+      // Close dropdown menu when clicking anywhere outside
+      document.addEventListener('click', (e) => {
+        if (!btnHeaderMenu.contains(e.target) && !headerDropdownMenu.contains(e.target)) {
+          headerDropdownMenu.classList.remove('show');
+          btnHeaderMenu.classList.remove('active');
+        }
+      });
+    }
+
+    $('toolFullscreen').onclick = () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => { });
+      } else {
+        document.exitFullscreen().catch(() => { });
+      }
+    };
+
+    $('btnBackToForm').onclick = () => {
+      diagramView.style.display = 'none';
+      setupView.style.display = 'block';
+      btnImport.disabled = false;
+      btnImport.innerHTML = `
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    Generate Schema Diagram
+  `;
+    };
+
+    // Add Interactive Sticky Note
+    $('btnAddNote').onclick = () => {
+      const vpW = canvasViewport ? canvasViewport.clientWidth : 800;
+      const vpH = canvasViewport ? canvasViewport.clientHeight : 600;
+      const x = Math.round((vpW / 2 - panX) / scale - 85);
+      const y = Math.round((vpH / 2 - panY) / scale - 55);
+      addStickyNote(x, y, "New note (click to edit)");
+      showToast('Added note. Drag to move or click × to delete.');
+    };
+
+    function addStickyNote(x, y, text) {
+      const note = document.createElement('div');
+      note.className = 'sticky-note';
+      note.style.left = `${x}px`;
+      note.style.top = `${y}px`;
+      note.innerHTML = `
+        <div class="sticky-tape"></div>
+        <button type="button" class="sticky-close" title="Delete note" onclick="this.closest('.sticky-note').remove();">&times;</button>
+        <div contenteditable="true" style="outline:none;">${text}</div>
+      `;
+      nodesLayer.appendChild(note);
+
+      // Make Draggable
+      let isDragging = false, startDx = 0, startDy = 0, origX = x, origY = y;
+      note.addEventListener('mousedown', (e) => {
+        if (e.target.getAttribute('contenteditable')) return;
+        isDragging = true;
+        startDx = e.clientX;
+        startDy = e.clientY;
+        origX = parseInt(note.style.left) || 0;
+        origY = parseInt(note.style.top) || 0;
+        note.style.zIndex = '40';
+        e.stopPropagation();
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = (e.clientX - startDx) / scale;
+        const dy = (e.clientY - startDy) / scale;
+        note.style.left = `${origX + dx}px`;
+        note.style.top = `${origY + dy}px`;
+      });
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          note.style.zIndex = '15';
+        }
+      });
+    }
+
+    $('btnExportSvg').onclick = () => {
+      showToast('Generating diagram export...');
+      const activeDb = ($('database') && $('database').value) || currentDatabaseName || 'schema_diagram';
+      const data = {
+        database: activeDb,
+        exported_at: new Date().toISOString(),
+        tables: Array.from(tablesMap.values()).map(t => ({
+          name: t.name,
+          columns: t.columns,
+          foreign_keys: t.foreign_keys
+        })),
+        relationships: relationships
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `schema-diagram-${activeDb}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Fast Client-side SQL Parser
+    function parseSqlContent(sqlText) {
+      const cleanSql = sqlText.replace(/--.*$/gm, '').replace(/#.*$/gm, '');
+      const tables = [];
+      const rels = [];
+
+      const tableRegex = /CREATE\s+(?:TEMPORARY\s+)?TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(?:[`"]?[\w$]+[`"]?\.)?[`"]?([\w$]+)[`"]?\s*\(([\s\S]*?)\)(?:[^;]*);/gi;
+      let match;
+
+      while ((match = tableRegex.exec(cleanSql)) !== null) {
+        const tableName = match[1];
+        const body = match[2];
+
+        const columns = [];
+        const pks = new Set();
+        const fks = [];
+
+        const lines = [];
+        let buf = '';
+        let depth = 0;
+        let quote = null;
+        for (let i = 0; i < body.length; i++) {
+          const c = body[i];
+          if (quote) {
+            buf += c;
+            if (c === quote) quote = null;
+          } else if (c === "'" || c === '"' || c === '`') {
+            quote = c;
+            buf += c;
+          } else if (c === '(') {
+            depth++;
+            buf += c;
+          } else if (c === ')') {
+            depth--;
+            buf += c;
+          } else if (c === ',' && depth === 0) {
+            lines.push(buf.trim());
+            buf = '';
+          } else {
+            buf += c;
+          }
+        }
+        if (buf.trim()) lines.push(buf.trim());
+
+        for (const l of lines) {
+          const pkMatch = l.match(/^\s*PRIMARY\s+KEY\s*\(([^)]+)\)/i);
+          if (pkMatch) {
+            pkMatch[1].split(',').forEach(c => pks.add(c.replace(/[`"\s]/g, '')));
+          }
+          const fkMatch = l.match(/(?:CONSTRAINT\s+[`"]?[\w$]+[`"]?\s+)?FOREIGN\s+KEY\s*\([`"]?([\w$]+)[`"]?\)\s+REFERENCES\s+(?:[`"]?[\w$]+[`"]?\.)?[`"]?([\w$]+)[`"]?\s*\([`"]?([\w$]+)[`"]?\)/i);
+          if (fkMatch) {
+            fks.push({ from_col: fkMatch[1], to_table: fkMatch[2], to_col: fkMatch[3] });
+            rels.push({ from_table: tableName, from_col: fkMatch[1], to_table: fkMatch[2], to_col: fkMatch[3] });
+          }
+        }
+
+        for (const l of lines) {
+          const clean = l.trim();
+          if (!clean || /^(PRIMARY\s+KEY|KEY|INDEX|UNIQUE|CONSTRAINT|FULLTEXT|CHECK)\b/i.test(clean)) continue;
+          const colMatch = clean.match(/^[`"]?([\w$]+)[`"]?\s+([A-Za-z0-9_]+(?:\([^)]*\))?)/);
+          if (colMatch) {
+            const colName = colMatch[1];
+            let colType = colMatch[2].toLowerCase();
+            const isPk = pks.has(colName) || /\bPRIMARY\s+KEY\b/i.test(clean);
+            const isNullable = !/\bNOT\s+NULL\b/i.test(clean);
+
+            // Format nullable with ? like DrawSQL
+            if (isNullable && !isPk) {
+              colType += '?';
+            }
+
+            columns.push({ name: colName, type: colType, pk: isPk, nullable: isNullable });
+          }
+        }
+
+        tables.push({
+          table: tableName,
+          columns: columns,
+          foreign_keys: fks
+        });
+      }
+
+      const alterFkRegex = /ALTER\s+TABLE\s+(?:[`"]?[\w$]+[`"]?\.)?[`"]?([\w$]+)[`"]?\s+ADD\s+(?:CONSTRAINT\s+[`"]?[\w$]+[`"]?\s+)?FOREIGN\s+KEY\s*\([`"]?([\w$]+)[`"]?\)\s+REFERENCES\s+(?:[`"]?[\w$]+[`"]?\.)?[`"]?([\w$]+)[`"]?\s*\([`"]?([\w$]+)[`"]?\)/gi;
+      let alterMatch;
+      while ((alterMatch = alterFkRegex.exec(cleanSql)) !== null) {
+        rels.push({
+          from_table: alterMatch[1],
+          from_col: alterMatch[2],
+          to_table: alterMatch[3],
+          to_col: alterMatch[4]
+        });
+      }
+
+      return { tables, rels };
+    }
+
+    // Inferred Relationships: Detects user_id -> users.id, business_id -> businesses.id, owner_id -> users.id, etc.
+    function inferMissingRelationships() {
+      const allNames = Array.from(tablesMap.keys());
+      let addedCount = 0;
+
+      allNames.forEach(tblName => {
+        const t = tablesMap.get(tblName);
+        if (!t || !t.columns) return;
+
+        t.columns.forEach(col => {
+          const colName = col.name.toLowerCase();
+          if (!colName.endsWith('_id')) return;
+          if (col.pk) return;
+
+          const base = colName.slice(0, -3); // e.g. "business", "user", "event", "owner", "province"
+          let candidates = [
+            base,
+            base + 's',
+            base + 'es',
+            base.replace(/y$/, 'ies')
+          ];
+
+          // Domain heuristics matching DrawSQL diagrams
+          if (base === 'owner' || base === 'author' || base === 'creator') {
+            candidates.push('users', 'user', 'accounts');
+          }
+          if (base === 'province') {
+            candidates.push('places', 'provinces', 'locations');
+          }
+          if (base === 'parent') {
+            candidates.push(tblName);
+          }
+
+          for (const cand of candidates) {
+            const target = allNames.find(n => n.toLowerCase() === cand.toLowerCase());
+            if (target) {
+              const exists = relationships.some(r =>
+                r.from_table.toLowerCase() === tblName.toLowerCase() &&
+                r.from_col.toLowerCase() === col.name.toLowerCase() &&
+                r.to_table.toLowerCase() === target.toLowerCase()
+              );
+              if (!exists) {
+                relationships.push({
+                  from_table: tblName,
+                  from_col: col.name,
+                  to_table: target,
+                  to_col: 'id',
+                  inferred: true
+                });
+                col.is_fk = true;
+                addedCount++;
+              }
+              break;
+            }
+          }
+        });
+      });
+
+      $('diagRelations').textContent = relationships.length;
+      return addedCount;
+    }
+
+    function buildTableColumnsHtml(tblName, columns) {
+      if (!columns || columns.length === 0) {
+        return `<div style="padding:10px;color:#94a3b8;text-align:center;">No columns parsed</div>`;
+      }
+      return columns.map((col, idx) => {
+        let icon = '○';
+        let iconClass = 'col-icon';
+        if (col.pk) {
+          icon = '🔑';
+          iconClass = 'col-icon pk';
+        } else if (col.name.endsWith('_id') || col.is_fk) {
+          icon = '⚲';
+          iconClass = 'col-icon fk';
+        } else if (col.name === 'slug' || col.is_unique) {
+          icon = '❄';
+          iconClass = 'col-icon';
+        }
+
+        return `
+      <div class="col-row" data-table="${tblName}" data-col="${col.name}" data-idx="${idx}">
+        <div class="col-left">
+          <span class="${iconClass}">${icon}</span>
+          <span title="${col.name}">${col.name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="col-type">${col.type}</div>
+          <span class="col-dots-btn" title="Options" onclick="event.stopPropagation(); openColumnMenu(event, '${tblName}', '${col.name}')">•••</span>
+        </div>
+      </div>
+    `;
+      }).join('');
+    }
+
+    function renderTableCardColumns(tblName) {
+      const t = tablesMap.get(tblName);
+      if (!t || !t.el) return;
+
+      const titleSpan = t.el.querySelector('.tbl-title-span');
+      const colsCountSpan = t.el.querySelector('.tbl-cols-count');
+      const colsContainer = t.el.querySelector('.table-columns');
+
+      if (titleSpan) titleSpan.textContent = t.name;
+      if (colsCountSpan) colsCountSpan.textContent = `${t.columns ? t.columns.length : 0} cols`;
+      if (colsContainer) colsContainer.innerHTML = buildTableColumnsHtml(t.name, t.columns);
+
+      t.height = t.el.offsetHeight || 160;
+    }
+
+    // Add Table Node to DrawSQL Canvas
+    function addTableNode(data) {
+      const tblName = data.table;
+      if (tablesMap.has(tblName)) return;
+
+      let minCol = 0;
+      for (let c = 1; c < NUM_COLS; c++) {
+        if (columnHeights[c] < columnHeights[minCol]) minCol = c;
+      }
+      const x = minCol * (COL_WIDTH + COL_GAP_X);
+      const y = columnHeights[minCol];
+
+      // Specific thematic header colors like DrawSQL
+      let colorClass = HEADER_COLORS[colorIndex % HEADER_COLORS.length];
+      const lower = tblName.toLowerCase();
+      if (lower.includes('user') || lower.includes('auth') || lower.includes('verif')) colorClass = 'color-green';
+      else if (lower.includes('book') || lower.includes('pay') || lower.includes('order')) colorClass = 'color-amber';
+      else if (lower.includes('dispute') || lower.includes('cancel') || lower.includes('policy')) colorClass = 'color-teal';
+      else if (lower.includes('list') || lower.includes('event') || lower.includes('place')) colorClass = 'color-red';
+      else colorIndex++;
+
+      const card = document.createElement('div');
+      card.className = 'table-card';
+      card.id = `node_${tblName}`;
+      card.style.left = `${x}px`;
+      card.style.top = `${y}px`;
+
+      const colsHtml = buildTableColumnsHtml(tblName, data.columns);
+
+      card.innerHTML = `
+    <div class="table-header ${colorClass}">
+      <span class="tbl-title-span">${tblName}</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="tbl-cols-count" style="font-size:11px;opacity:0.75;">${data.columns ? data.columns.length : 0} cols</span>
+        <span class="card-dots" title="Table options" onclick="event.stopPropagation(); openTableMenu(event, '${tblName}')">•••</span>
+      </div>
+    </div>
+    <div class="table-columns">
+      ${colsHtml}
+    </div>
+    <div class="table-footer">
+      <span>${data.is_view ? 'VIEW' : 'TABLE'}</span>
+      <span style="cursor:pointer;" title="Click to copy name" onclick="navigator.clipboard.writeText('${tblName}')">Copy</span>
+    </div>
+  `;
+
+      nodesLayer.appendChild(card);
+
+      const measuredH = card.offsetHeight || 160;
+      columnHeights[minCol] += measuredH + ROW_GAP_Y;
+
+      const tableObj = {
+        name: tblName,
+        columns: data.columns || [],
+        foreign_keys: data.foreign_keys || [],
+        x: x,
+        y: y,
+        width: COL_WIDTH,
+        height: measuredH,
+        el: card
+      };
+      tablesMap.set(tblName, tableObj);
+
+      if (data.foreign_keys && data.foreign_keys.length) {
+        data.foreign_keys.forEach(fk => {
+          relationships.push({
+            from_table: tblName,
+            from_col: fk.from_col,
+            to_table: fk.to_table,
+            to_col: fk.to_col
+          });
+        });
+      }
+
+      inferMissingRelationships();
+      makeDraggable(card, tableObj);
+      renderConnectors();
+    }
+
+    function makeDraggable(el, tableObj) {
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let initialNodeX = 0;
+      let initialNodeY = 0;
+      let dragDistance = 0;
+
+      el.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.card-dots, .col-dots-btn, .pill-dots')) return;
+        if (e.target.tagName === 'SPAN' && e.target.getAttribute('onclick')) return;
+        isDragging = true;
+        dragDistance = 0;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        initialNodeX = tableObj.x;
+        initialNodeY = tableObj.y;
+        el.style.zIndex = '40';
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = (e.clientX - dragStartX) / scale;
+        const dy = (e.clientY - dragStartY) / scale;
+        dragDistance += Math.hypot(dx, dy);
+        tableObj.x = initialNodeX + dx;
+        tableObj.y = initialNodeY + dy;
+        el.style.left = `${tableObj.x}px`;
+        el.style.top = `${tableObj.y}px`;
+        renderConnectors();
+      });
+
+      window.addEventListener('mouseup', (e) => {
+        if (isDragging) {
+          isDragging = false;
+          el.style.zIndex = tableObj.name === selectedTable ? '38' : '20';
+          // If minimal drag movement, treat as a direct table selection click
+          if (dragDistance < 6) {
+            selectTable(tableObj.name);
+          }
+        }
+      });
+    }
+
+    // Render Exact Table-to-Table Orthogonal (Manhattan) Connectors
+    function renderConnectors() {
+      const paths = diagramSvg.querySelectorAll('path.fk-line, circle.fk-dot');
+      paths.forEach(p => p.remove());
+
+      relationships.forEach((rel, rIdx) => {
+        const fromTbl = tablesMap.get(rel.from_table);
+        const toTbl = tablesMap.get(rel.to_table);
+        if (!fromTbl || !toTbl) return;
+
+        const fromWidth = fromTbl.width || COL_WIDTH;
+        const toWidth = toTbl.width || COL_WIDTH;
+
+        // Exact Column Y Anchor
+        const fromColIdx = fromTbl.columns ? fromTbl.columns.findIndex(c => c.name.toLowerCase() === rel.from_col.toLowerCase()) : -1;
+        const toColIdx = toTbl.columns ? toTbl.columns.findIndex(c => c.name.toLowerCase() === rel.to_col.toLowerCase()) : -1;
+
+        const y1 = fromTbl.y + 36 + (fromColIdx >= 0 ? Math.min(fromColIdx * 25 + 12, 380) : 20);
+        const y2 = toTbl.y + 36 + (toColIdx >= 0 ? Math.min(toColIdx * 25 + 12, 380) : 20);
+
+        let x1, x2, isRightExit = true;
+
+        if (fromTbl.x + fromWidth < toTbl.x) {
+          // fromTbl is strictly to the left of toTbl
+          x1 = fromTbl.x + fromWidth;
+          x2 = toTbl.x;
+          isRightExit = true;
+        } else if (toTbl.x + toWidth < fromTbl.x) {
+          // fromTbl is strictly to the right of toTbl
+          x1 = fromTbl.x;
+          x2 = toTbl.x + toWidth;
+          isRightExit = false;
+        } else {
+          // Overlapping columns: route around the right side
+          x1 = fromTbl.x + fromWidth;
+          x2 = toTbl.x + toWidth;
+          isRightExit = true;
+        }
+
+        // DrawSQL Manhattan Right-Angled Routing
+        const stub = 24 + ((rIdx % 5) * 8); // spread parallel vertical channels
+        let d;
+        if (isRightExit && x2 > x1) {
+          const midX = (x1 + x2) / 2;
+          d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+        } else if (!isRightExit && x2 < x1) {
+          const midX = (x1 + x2) / 2;
+          d = `M ${x1} ${y1} L ${midX} ${y1} L ${midX} ${y2} L ${x2} ${y2}`;
+        } else {
+          // Same side routing
+          const detourX = Math.max(x1, x2) + stub;
+          d = `M ${x1} ${y1} L ${detourX} ${y1} L ${detourX} ${y2} L ${x2} ${y2}`;
+        }
+
+        // Check selection highlight state
+        let isActive = false;
+        if (selectedRel && selectedRel === rel) {
+          isActive = true;
+        } else if (selectedTable && (rel.from_table.toLowerCase() === selectedTable.toLowerCase() || rel.to_table.toLowerCase() === selectedTable.toLowerCase())) {
+          isActive = true;
+        }
+
+        // SVG Line
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', 'fk-line' + (isActive ? ' active-line' : ''));
+        path.setAttribute('marker-end', isActive ? 'url(#fk-arrow-active)' : 'url(#fk-arrow)');
+        path.setAttribute('data-from', rel.from_table);
+        path.setAttribute('data-to', rel.to_table);
+        path.setAttribute('data-from-col', rel.from_col);
+        path.setAttribute('data-to-col', rel.to_col);
+
+        // Endpoint dot at the foreign key origin
+        const dot1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot1.setAttribute('cx', x1);
+        dot1.setAttribute('cy', y1);
+        dot1.setAttribute('r', isActive ? '4.5' : '3');
+        dot1.setAttribute('class', 'fk-dot' + (isActive ? ' active-dot' : ''));
+        dot1.setAttribute('fill', isActive ? '#4f46e5' : '#64748b');
+
+        // Endpoint dot at target table
+        const dot2 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot2.setAttribute('cx', x2);
+        dot2.setAttribute('cy', y2);
+        dot2.setAttribute('r', isActive ? '4.5' : '3');
+        dot2.setAttribute('class', 'fk-dot' + (isActive ? ' active-dot' : ''));
+        dot2.setAttribute('fill', isActive ? '#4f46e5' : '#64748b');
+
+        // Click on relationship line or dots: highlights relationship & opens sidebar
+        const onRelClick = (e) => {
+          e.stopPropagation();
+          selectRelationship(rel, path);
+        };
+        path.addEventListener('click', onRelClick);
+        dot1.addEventListener('click', onRelClick);
+        dot2.addEventListener('click', onRelClick);
+
+        // Interactive Hover when not in focus selection mode
+        path.addEventListener('mouseenter', () => {
+          if (!selectedTable && !selectedRel) {
+            path.classList.add('highlight');
+            path.setAttribute('marker-end', 'url(#fk-arrow-active)');
+            dot1.setAttribute('fill', '#3b52d9');
+            dot1.setAttribute('r', '4.5');
+            dot2.setAttribute('fill', '#3b52d9');
+            dot2.setAttribute('r', '4.5');
+
+            const fromRow = fromTbl.el.querySelector(`.col-row[data-col="${rel.from_col}"]`);
+            const toRow = toTbl.el.querySelector(`.col-row[data-col="${rel.to_col}"]`);
+            if (fromRow) fromRow.classList.add('highlight');
+            if (toRow) toRow.classList.add('highlight');
+          }
+        });
+
+        path.addEventListener('mouseleave', () => {
+          if (!selectedTable && !selectedRel) {
+            path.classList.remove('highlight');
+            path.setAttribute('marker-end', 'url(#fk-arrow)');
+            dot1.setAttribute('fill', '#64748b');
+            dot1.setAttribute('r', '3');
+            dot2.setAttribute('fill', '#64748b');
+            dot2.setAttribute('r', '3');
+
+            const fromRow = fromTbl.el.querySelector(`.col-row[data-col="${rel.from_col}"]`);
+            const toRow = toTbl.el.querySelector(`.col-row[data-col="${rel.to_col}"]`);
+            if (fromRow) fromRow.classList.remove('highlight');
+            if (toRow) toRow.classList.remove('highlight');
+          }
+        });
+
+        diagramSvg.appendChild(path);
+        diagramSvg.appendChild(dot1);
+        diagramSvg.appendChild(dot2);
+      });
+
+      $('diagRelations').textContent = relationships.length;
+    }
+
+    // ==========================================
+    // DRAWSQL INTERACTIVE SELECTION & SIDEBAR
+    // ==========================================
+
+    function selectTable(tblName) {
+      if (!tablesMap.has(tblName)) return;
+      selectedTable = tblName;
+      selectedRel = null;
+
+      canvasWorld.classList.add('has-selection');
+
+      // Reset classes on all table cards & column rows
+      tablesMap.forEach((t) => {
+        t.el.classList.remove('selected', 'connected');
+        t.el.querySelectorAll('.col-row').forEach(r => r.classList.remove('highlight'));
+      });
+
+      const activeTbl = tablesMap.get(tblName);
+      activeTbl.el.classList.add('selected');
+
+      // Find all tables and columns directly connected to this table
+      const connectedTableNames = new Set();
+      let connCount = 0;
+
+      relationships.forEach(rel => {
+        if (rel.from_table.toLowerCase() === tblName.toLowerCase()) {
+          connectedTableNames.add(rel.to_table);
+          connCount++;
+          const fromRow = activeTbl.el.querySelector(`.col-row[data-col="${rel.from_col}"]`);
+          if (fromRow) fromRow.classList.add('highlight');
+          const targetTbl = tablesMap.get(rel.to_table);
+          if (targetTbl) {
+            const toRow = targetTbl.el.querySelector(`.col-row[data-col="${rel.to_col}"]`);
+            if (toRow) toRow.classList.add('highlight');
+          }
+        } else if (rel.to_table.toLowerCase() === tblName.toLowerCase()) {
+          connectedTableNames.add(rel.from_table);
+          connCount++;
+          const toRow = activeTbl.el.querySelector(`.col-row[data-col="${rel.to_col}"]`);
+          if (toRow) toRow.classList.add('highlight');
+          const srcTbl = tablesMap.get(rel.from_table);
+          if (srcTbl) {
+            const fromRow = srcTbl.el.querySelector(`.col-row[data-col="${rel.from_col}"]`);
+            if (fromRow) fromRow.classList.add('highlight');
+          }
+        }
+      });
+
+      connectedTableNames.forEach(cName => {
+        const t = tablesMap.get(cName);
+        if (t) t.el.classList.add('connected');
+      });
+
+      // Re-render lines with active highlights
+      renderConnectors();
+
+      // Populate DrawSQL left sidebar with column pills
+      populateSidebarForTable(activeTbl, connCount);
+      openSidebar();
+    }
+
+    function selectRelationship(rel, pathEl) {
+      selectedRel = rel;
+      selectedTable = rel.from_table;
+
+      canvasWorld.classList.add('has-selection');
+
+      tablesMap.forEach((t) => {
+        t.el.classList.remove('selected', 'connected');
+        t.el.querySelectorAll('.col-row').forEach(r => r.classList.remove('highlight'));
+      });
+
+      const fromTbl = tablesMap.get(rel.from_table);
+      const toTbl = tablesMap.get(rel.to_table);
+
+      if (fromTbl) {
+        fromTbl.el.classList.add('selected');
+        const fromRow = fromTbl.el.querySelector(`.col-row[data-col="${rel.from_col}"]`);
+        if (fromRow) fromRow.classList.add('highlight');
+      }
+      if (toTbl) {
+        toTbl.el.classList.add('connected');
+        const toRow = toTbl.el.querySelector(`.col-row[data-col="${rel.to_col}"]`);
+        if (toRow) toRow.classList.add('highlight');
+      }
+
+      renderConnectors();
+
+      if (fromTbl) {
+        populateSidebarForTable(fromTbl, 1, `${rel.from_table}.${rel.from_col} ➔ ${rel.to_table}.${rel.to_col}`);
+        openSidebar();
+      }
+    }
+
+    function clearSelection() {
+      selectedTable = null;
+      selectedRel = null;
+      canvasWorld.classList.remove('has-selection');
+
+      tablesMap.forEach(t => {
+        t.el.classList.remove('selected', 'connected');
+        t.el.querySelectorAll('.col-row').forEach(r => r.classList.remove('highlight'));
+      });
+
+      renderConnectors();
+      btnClearSelection.style.display = 'none';
+      sidebarActiveTableName.textContent = 'All Tables';
+      renderAllTablesInSidebar();
+    }
+
+    function populateSidebarForTable(tbl, relCount, bannerNotice) {
+      sidebarActiveTableName.textContent = tbl.name;
+      sidebarRelCount.textContent = bannerNotice || `${relCount || 0} connected relationships`;
+      btnClearSelection.style.display = 'inline-block';
+
+      if (!tbl.columns || tbl.columns.length === 0) {
+        sidebarColumnsList.innerHTML = `<div style="padding:20px;text-align:center;color:#94a3b8;">No columns in this table</div>`;
+        return;
+      }
+
+      sidebarColumnsList.innerHTML = tbl.columns.map(col => {
+        let icon = '○';
+        let iconTitle = 'Column';
+        if (col.pk) {
+          icon = '🔑';
+          iconTitle = 'Primary key';
+        } else if (col.name.endsWith('_id') || col.is_fk) {
+          icon = '⚲';
+          iconTitle = 'Foreign key';
+        } else if (col.name === 'slug' || col.is_unique) {
+          icon = '❄';
+          iconTitle = 'Unique';
+        }
+
+        const isNullable = col.nullable !== false;
+
+        return `
+      <div class="sidebar-col-row" data-col="${col.name}">
+        <div class="pill-name" title="${col.name}">${col.name}</div>
+        <div class="pill-type" title="${col.type}">${col.type}</div>
+        <div class="pill-null" title="${isNullable ? 'Nullable' : 'Not Null'}">${isNullable ? 'N' : '-'}</div>
+        <div class="pill-icon" title="${iconTitle}">${icon}</div>
+        <div class="pill-dots" title="Column options" onclick="event.stopPropagation(); openColumnMenu(event, '${tbl.name}', '${col.name}')">•••</div>
+      </div>
+    `;
+      }).join('');
+    }
+
+    function renderAllTablesInSidebar() {
+      if (tablesMap.size === 0) {
+        sidebarColumnsList.innerHTML = `<div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">No tables loaded</div>`;
+        return;
+      }
+
+      sidebarRelCount.textContent = `${tablesMap.size} tables total`;
+      sidebarColumnsList.innerHTML = Array.from(tablesMap.values()).map(t => {
+        const colCount = t.columns ? t.columns.length : 0;
+        return `
+      <div class="sidebar-col-row" style="cursor:pointer;" onclick="selectTable('${t.name}')">
+        <div class="pill-name" style="font-weight:700;">${t.name}</div>
+        <div class="pill-type">${colCount} cols</div>
+        <div class="pill-dots" title="Table options" onclick="event.stopPropagation(); openTableMenu(event, '${t.name}')">•••</div>
+      </div>
+    `;
+      }).join('');
+    }
+
+    function openSidebar() {
+      drawsqlSidebar.classList.remove('collapsed');
+      btnFloatingOpenSidebar.style.display = 'none';
+      isSidebarOpen = true;
+    }
+
+    function closeSidebar() {
+      drawsqlSidebar.classList.add('collapsed');
+      btnFloatingOpenSidebar.style.display = 'flex';
+      isSidebarOpen = false;
+    }
+
+    function focusTable(tblName) {
+      if (!tblName || !tablesMap.has(tblName)) return;
+      const t = tablesMap.get(tblName);
+      const vpW = canvasViewport.clientWidth;
+      const vpH = canvasViewport.clientHeight;
+
+      scale = 1.0;
+      const sidebarOffset = isSidebarOpen ? 160 : 0;
+      panX = (vpW / 2 + sidebarOffset) - (t.x + (t.width || COL_WIDTH) / 2) * scale;
+      panY = (vpH / 2) - (t.y + (t.height || 180) / 2) * scale;
+      updateTransform();
+      showToast(`Centered on ${tblName}`);
+    }
+
+    // Sidebar Buttons Wiring
+    btnCloseSidebar.onclick = closeSidebar;
+    btnFloatingOpenSidebar.onclick = openSidebar;
+    btnClearSelection.onclick = clearSelection;
+    btnFocusActiveTable.onclick = () => focusTable(selectedTable);
+    btnCopyTableSql.onclick = () => {
+      if (selectedTable) {
+        navigator.clipboard.writeText(selectedTable);
+        showToast(`Copied "${selectedTable}" to clipboard`);
+      }
+    };
+
+    if (btnTableOptions) {
+      btnTableOptions.onclick = (e) => {
+        if (selectedTable && tablesMap.has(selectedTable)) {
+          e.stopPropagation();
+          openTableMenu(e, selectedTable);
+        } else {
+          showToast('Select a table first to see options');
+        }
+      };
+    }
+
+    // ==========================================
+    // DrawSQL Context Menu & Modal Logic (View, Edit, Delete)
+    // ==========================================
+    function openColumnMenu(e, tableName, colName) {
+      currentMenuContext = { type: 'column', table: tableName, column: colName };
+      showContextMenu(e);
+    }
+
+    function openTableMenu(e, tableName) {
+      currentMenuContext = { type: 'table', table: tableName };
+      showContextMenu(e);
+    }
+
+    function showContextMenu(e) {
+      const menuWidth = 175;
+      const menuHeight = 140;
+      let posX = e.clientX;
+      let posY = e.clientY;
+
+      // Screen boundary clamping
+      if (posX + menuWidth > window.innerWidth) {
+        posX = window.innerWidth - menuWidth - 14;
+      }
+      if (posY + menuHeight > window.innerHeight) {
+        posY = window.innerHeight - menuHeight - 14;
+      }
+
+      contextMenuDropdown.style.left = `${posX}px`;
+      contextMenuDropdown.style.top = `${posY}px`;
+      contextMenuDropdown.style.display = 'block';
+    }
+
+    function hideContextMenu() {
+      contextMenuDropdown.style.display = 'none';
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!contextMenuDropdown.contains(e.target)) {
+        hideContextMenu();
+      }
+    });
+
+    function openModal() {
+      drawsqlModal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      drawsqlModal.style.display = 'none';
+    }
+
+    btnModalClose.onclick = closeModal;
+    btnModalCancel.onclick = closeModal;
+    drawsqlModal.onclick = (e) => {
+      if (e.target === drawsqlModal) closeModal();
+    };
+
+    // 1. View Details Action
+    function showViewModal(ctx) {
+      if (ctx.type === 'column') {
+        const t = tablesMap.get(ctx.table);
+        const col = t ? t.columns.find(c => c.name === ctx.column) : null;
+        if (!col) return;
+
+        const relFrom = relationships.filter(r => r.from_table === ctx.table && r.from_col === ctx.column);
+        const relTo = relationships.filter(r => r.to_table === ctx.table && r.to_col === ctx.column);
+
+        let relText = '<span style="color:#94a3b8;font-weight:normal;">None</span>';
+        if (relFrom.length > 0) {
+          relText = relFrom.map(r => `➔ References <span style="color:#6366f1;">${r.to_table}.${r.to_col}</span>`).join('<br>');
+        } else if (relTo.length > 0) {
+          relText = relTo.map(r => `⬅ Referenced by <span style="color:#0ea5e9;">${r.from_table}.${r.from_col}</span>`).join('<br>');
+        }
+
+        modalTag.className = 'modal-tag';
+        modalTag.textContent = 'VIEW';
+        modalHeading.textContent = `${ctx.table}.${col.name}`;
+
+        modalContent.innerHTML = `
+      <table class="modal-view-table">
+        <tr><td>Table</td><td>${ctx.table}</td></tr>
+        <tr><td>Column</td><td>${col.name}</td></tr>
+        <tr><td>Data Type</td><td><span style="color:#6366f1;font-weight:700;">${col.type}</span></td></tr>
+        <tr><td>Nullable</td><td>${col.nullable !== false ? 'YES (Nullable)' : 'NO (NOT NULL)'}</td></tr>
+        <tr><td>Primary Key</td><td>${col.pk ? 'YES 🔑' : 'NO'}</td></tr>
+        <tr><td>Relationship</td><td>${relText}</td></tr>
+      </table>
+    `;
+        btnModalSave.style.display = 'none';
+        btnModalCancel.textContent = 'Close';
+        openModal();
+      } else if (ctx.type === 'table') {
+        const t = tablesMap.get(ctx.table);
+        if (!t) return;
+
+        const tableRels = relationships.filter(r => r.from_table === ctx.table || r.to_table === ctx.table);
+        const pkCols = t.columns ? t.columns.filter(c => c.pk).map(c => c.name).join(', ') : '';
+
+        modalTag.className = 'modal-tag';
+        modalTag.textContent = 'VIEW';
+        modalHeading.textContent = `Table: ${ctx.table}`;
+
+        modalContent.innerHTML = `
+      <table class="modal-view-table">
+        <tr><td>Table Name</td><td>${t.name}</td></tr>
+        <tr><td>Total Columns</td><td>${t.columns ? t.columns.length : 0} columns</td></tr>
+        <tr><td>Primary Key(s)</td><td>${pkCols || '<span style="color:#94a3b8;font-weight:normal;">None</span>'}</td></tr>
+        <tr><td>Connected Rels</td><td>${tableRels.length} relationships</td></tr>
+        <tr><td>Canvas Position</td><td>X: ${Math.round(t.x)}px, Y: ${Math.round(t.y)}px</td></tr>
+      </table>
+    `;
+        btnModalSave.style.display = 'none';
+        btnModalCancel.textContent = 'Close';
+        openModal();
+      }
+    }
+
+    // 2. Edit Action
+    function showEditModal(ctx) {
+      if (ctx.type === 'column') {
+        const t = tablesMap.get(ctx.table);
+        const col = t ? t.columns.find(c => c.name === ctx.column) : null;
+        if (!col) return;
+
+        modalTag.className = 'modal-tag edit';
+        modalTag.textContent = 'EDIT';
+        modalHeading.textContent = `Edit Column: ${ctx.table}.${col.name}`;
+
+        modalContent.innerHTML = `
+      <div class="modal-field">
+        <label for="editColNameInput">Column Name</label>
+        <input type="text" id="editColNameInput" value="${col.name}">
+      </div>
+      <div class="modal-field">
+        <label for="editColTypeInput">Data Type</label>
+        <input type="text" id="editColTypeInput" value="${col.type}" list="commonSqlTypes" placeholder="e.g. VARCHAR(255)">
+        <datalist id="commonSqlTypes">
+          <option value="INT">
+          <option value="BIGINT">
+          <option value="VARCHAR(255)">
+          <option value="VARCHAR(100)">
+          <option value="TEXT">
+          <option value="LONGTEXT">
+          <option value="TINYINT(1)">
+          <option value="BOOLEAN">
+          <option value="DECIMAL(10,2)">
+          <option value="DATETIME">
+          <option value="TIMESTAMP">
+          <option value="JSON">
+        </datalist>
+      </div>
+      <label class="modal-field-checkbox">
+        <input type="checkbox" id="editColNullableInput" ${col.nullable !== false ? 'checked' : ''}>
+        <span>Nullable (Allow NULL values)</span>
+      </label>
+      <label class="modal-field-checkbox">
+        <input type="checkbox" id="editColPkInput" ${col.pk ? 'checked' : ''}>
+        <span>Primary Key (PK)</span>
+      </label>
+    `;
+
+        btnModalSave.style.display = 'inline-block';
+        btnModalSave.textContent = 'Save Changes';
+        btnModalCancel.textContent = 'Cancel';
+
+        btnModalSave.onclick = () => {
+          const newName = $('editColNameInput').value.trim();
+          const newType = $('editColTypeInput').value.trim() || 'VARCHAR(255)';
+          const newNullable = $('editColNullableInput').checked;
+          const newPk = $('editColPkInput').checked;
+
+          if (!newName) {
+            showToast('Column name cannot be empty');
+            return;
+          }
+
+          const oldName = col.name;
+          col.name = newName;
+          col.type = newType;
+          col.nullable = newNullable;
+          col.pk = newPk;
+
+          // Update foreign key relationships if column was renamed
+          if (oldName !== newName) {
+            relationships.forEach(r => {
+              if (r.from_table === ctx.table && r.from_col === oldName) r.from_col = newName;
+              if (r.to_table === ctx.table && r.to_col === oldName) r.to_col = newName;
+            });
+          }
+
+          // Refresh Canvas Card and Sidebar
+          renderTableCardColumns(ctx.table);
+
+          if (selectedTable === ctx.table) {
+            const connCount = relationships.filter(r => r.from_table === ctx.table || r.to_table === ctx.table).length;
+            populateSidebarForTable(t, connCount);
+          }
+
+          renderConnectors();
+          closeModal();
+          showToast(`Updated column "${newName}"`);
+        };
+
+        openModal();
+      } else if (ctx.type === 'table') {
+        const t = tablesMap.get(ctx.table);
+        if (!t) return;
+
+        modalTag.className = 'modal-tag edit';
+        modalTag.textContent = 'EDIT';
+        modalHeading.textContent = `Edit Table: ${ctx.table}`;
+
+        modalContent.innerHTML = `
+      <div class="modal-field">
+        <label for="editTableNameInput">Table Name</label>
+        <input type="text" id="editTableNameInput" value="${t.name}">
+      </div>
+    `;
+
+        btnModalSave.style.display = 'inline-block';
+        btnModalSave.textContent = 'Save Changes';
+        btnModalCancel.textContent = 'Cancel';
+
+        btnModalSave.onclick = () => {
+          const newName = $('editTableNameInput').value.trim();
+          if (!newName) {
+            showToast('Table name cannot be empty');
+            return;
+          }
+
+          const oldName = t.name;
+          if (oldName === newName) {
+            closeModal();
+            return;
+          }
+
+          if (tablesMap.has(newName)) {
+            showToast(`Table "${newName}" already exists`);
+            return;
+          }
+
+          // Update tablesMap key
+          t.name = newName;
+          tablesMap.delete(oldName);
+          tablesMap.set(newName, t);
+
+          // Update Card Element
+          t.el.id = `node_${newName}`;
+          renderTableCardColumns(newName);
+
+          // Update relationships
+          relationships.forEach(r => {
+            if (r.from_table === oldName) r.from_table = newName;
+            if (r.to_table === oldName) r.to_table = newName;
+          });
+
+          if (selectedTable === oldName) {
+            selectedTable = newName;
+            const connCount = relationships.filter(r => r.from_table === newName || r.to_table === newName).length;
+            populateSidebarForTable(t, connCount);
+          } else {
+            renderAllTablesInSidebar();
+          }
+
+          renderConnectors();
+          closeModal();
+          showToast(`Renamed table to "${newName}"`);
+        };
+
+        openModal();
+      }
+    }
+
+    // 3. Delete Action
+    function deleteItem(ctx) {
+      if (ctx.type === 'column') {
+        const t = tablesMap.get(ctx.table);
+        if (!t) return;
+        if (!confirm(`Are you sure you want to delete column "${ctx.column}" from table "${ctx.table}"?`)) return;
+
+        // Remove column
+        t.columns = t.columns.filter(c => c.name !== ctx.column);
+
+        // Remove relationships attached to this column
+        relationships = relationships.filter(r => {
+          const match = (r.from_table === ctx.table && r.from_col === ctx.column) ||
+            (r.to_table === ctx.table && r.to_col === ctx.column);
+          return !match;
+        });
+
+        renderTableCardColumns(ctx.table);
+        $('diagRelations').textContent = relationships.length;
+
+        if (selectedTable === ctx.table) {
+          const connCount = relationships.filter(r => r.from_table === ctx.table || r.to_table === ctx.table).length;
+          populateSidebarForTable(t, connCount);
+        }
+
+        renderConnectors();
+        showToast(`Deleted column "${ctx.column}"`);
+      } else if (ctx.type === 'table') {
+        const t = tablesMap.get(ctx.table);
+        if (!t) return;
+        if (!confirm(`Are you sure you want to delete table "${ctx.table}" and all its relationships?`)) return;
+
+        if (t.el) t.el.remove();
+        tablesMap.delete(ctx.table);
+
+        relationships = relationships.filter(r => r.from_table !== ctx.table && r.to_table !== ctx.table);
+
+        $('diagTables').textContent = tablesMap.size;
+        $('diagRelations').textContent = relationships.length;
+
+        if (selectedTable === ctx.table) {
+          clearSelection();
+        } else {
+          renderAllTablesInSidebar();
+        }
+
+        renderConnectors();
+        showToast(`Deleted table "${ctx.table}"`);
+      }
+    }
+
+    // Wire Context Menu Item Clicks
+    ctxView.onclick = () => {
+      hideContextMenu();
+      if (currentMenuContext) showViewModal(currentMenuContext);
+    };
+
+    ctxEdit.onclick = () => {
+      hideContextMenu();
+      if (currentMenuContext) showEditModal(currentMenuContext);
+    };
+
+    ctxDelete.onclick = () => {
+      hideContextMenu();
+      if (currentMenuContext) deleteItem(currentMenuContext);
+    };
+
+    btnToggleSearch.onclick = () => {
+      if (sidebarSearchBox.style.display === 'none') {
+        sidebarSearchBox.style.display = 'block';
+        sidebarSearchInput.focus();
+      } else {
+        sidebarSearchBox.style.display = 'none';
+        sidebarSearchInput.value = '';
+        filterSidebarColumns('');
+      }
+    };
+
+    sidebarSearchInput.addEventListener('input', (e) => {
+      filterSidebarColumns(e.target.value.toLowerCase().trim());
+    });
+
+    function filterSidebarColumns(q) {
+      const rows = sidebarColumnsList.querySelectorAll('.sidebar-col-row');
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = (!q || text.includes(q)) ? 'flex' : 'none';
+      });
+    }
+
+    // Canvas Viewport background click: Clear Selection & Restore Full View
+    canvasViewport.addEventListener('click', (e) => {
+      if (e.target.closest('.table-card, .drawsql-sidebar, .drawsql-toolbar, .sticky-note, .sidebar-floating-toggle, .fk-line, .fk-dot')) return;
+      clearSelection();
+    });
+
+    // Form Submit: Instant Schema Diagram + Streaming MySQL Import
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const file = fileInput.files[0];
+      if (!file) {
+        fileInput.click();
+        return;
+      }
+
+      let dbName = ($('database') ? $('database').value.trim() : '') || currentDatabaseName;
+      if (!dbName && file.name) {
+        dbName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
+      }
+      if (!dbName) dbName = 'schema_diagram';
+      currentDatabaseName = dbName;
+      if ($('database')) $('database').value = dbName;
+
+      const formData = new FormData(form);
+      formData.set('database', dbName);
+      if (!formData.get('host')) formData.set('host', '127.0.0.1');
+      if (!formData.get('port')) formData.set('port', '3306');
+      if (!formData.get('user')) formData.set('user', 'root');
+      if (!formData.get('password')) formData.set('password', '');
+
+      // Switch to DrawSQL View
+      setupView.style.display = 'none';
+      diagramView.style.display = 'block';
+
+      $('displayDbName').textContent = dbName;
+      nodesLayer.innerHTML = '';
+      tablesMap.clear();
+      relationships = [];
+      columnHeights.fill(0);
+      colorIndex = 0;
+      scale = 0.85;
+      panX = 80;
+      panY = 100;
+      updateTransform();
+
+      $('diagStatements').textContent = '0';
+      $('diagTables').textContent = '0';
+      $('diagRelations').textContent = '0';
+      $('diagTime').textContent = '0.0s';
+      $('diagProgressFill').style.width = '0%';
+      $('diagErrorPill').style.display = 'none';
+      $('diagSpeedPill').style.display = 'none';
+      errorBanner.style.display = 'none';
+
+      // 1. Instant Diagram Render from file
+      try {
+        const text = await file.text();
+        const parsed = parseSqlContent(text);
+        if (parsed.tables.length > 0) {
+          parsed.tables.forEach(t => addTableNode(t));
+          if (parsed.rels && parsed.rels.length) {
+            parsed.rels.forEach(r => relationships.push(r));
+          }
+          inferMissingRelationships();
+          renderConnectors();
+          renderAllTablesInSidebar();
+          $('diagTables').textContent = tablesMap.size;
+          fitToScreen();
+          showToast(`Loaded ${tablesMap.size} tables with ${relationships.length} relationships!`, 3500);
+        }
+      } catch (parseErr) {
+        console.warn('Client parse error:', parseErr);
+      }
+
+      // 2. Stream Import into MySQL (optional/background)
+      try {
+        const res = await fetch('/import', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok || !res.headers.get('content-type')?.includes('text/event-stream')) {
+          const err = await res.json().catch(() => ({ message: res.statusText }));
+          console.log('MySQL live import not available:', err.message);
+          showToast('Viewing DrawSQL schema diagram (MySQL connection inactive)', 4000);
+          return;
+        }
+
+        $('diagSpeedPill').style.display = 'flex';
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const ev = JSON.parse(line.slice(6));
+                handleEvent(ev);
+              } catch (jsonErr) {
+                console.error('Failed to parse SSE:', line, jsonErr);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.log('Database import note:', err.message);
+        showToast('Viewing DrawSQL schema diagram', 3000);
+      }
+    };
+
+    function handleEvent(ev) {
+      if (ev.type === 'progress') {
+        $('diagProgressFill').style.width = `${ev.percent}%`;
+        $('diagStatements').textContent = ev.statements.toLocaleString();
+        if (tablesMap.size === 0) {
+          $('diagTables').textContent = (ev.table_count + ev.view_count).toLocaleString();
+        }
+        $('diagTime').textContent = `${ev.seconds}s`;
+
+        if (ev.seconds > 0) {
+          const speed = Math.round(ev.statements / ev.seconds);
+          $('diagSpeed').textContent = speed.toLocaleString();
+        }
+        if (ev.error_count > 0) {
+          $('diagErrorPill').style.display = 'flex';
+          $('diagErrors').textContent = ev.error_count;
+        }
+      } else if (ev.type === 'table_created') {
+        addTableNode(ev);
+        $('diagTables').textContent = tablesMap.size;
+        renderAllTablesInSidebar();
+      } else if (ev.type === 'relation_created') {
+        relationships.push(ev);
+        renderConnectors();
+      } else if (ev.type === 'done') {
+        $('diagProgressFill').style.width = '100%';
+        $('diagStatements').textContent = ev.statements.toLocaleString();
+        $('diagTables').textContent = (ev.table_count + (ev.view_count || 0)).toLocaleString();
+        $('diagTime').textContent = `${ev.seconds}s`;
+
+        inferMissingRelationships();
+        renderConnectors();
+        renderAllTablesInSidebar();
+        fitToScreen();
+        showToast(`🎉 Import completed! ${tablesMap.size} tables and ${relationships.length} relationships active.`, 5000);
+      } else if (ev.type === 'fatal') {
+        showError(ev.message);
+      }
+    }
+  </script>
+</body>
+
+</html>
