@@ -48,19 +48,18 @@ python app.py
 
 ---
 
-## ✨ Features
+## Features
 
 - **⚡ Memory-Safe Streaming**: Uses constant memory by streaming statements one by one. Handles multi-gigabyte SQL files smoothly without loading the entire dump into RAM.
-- **📡 Real-Time SSE Progress**: Live percentage progress bar, statement counter, execution speed (stmts/sec), live table creation feedback, and elapsed timer.
-- **🔍 Test Connection & DB Discovery**: Verify MySQL credentials with one click, inspect the MySQL version, and select from existing databases.
-- **🛡️ Smart Dump Sanitization**:
+- ** Real-Time SSE Progress**: Live percentage progress bar, statement counter, execution speed (stmts/sec), live table creation feedback, and elapsed timer.
+- ** Test Connection & DB Discovery**: Verify MySQL credentials with one click, inspect the MySQL version, and select from existing databases.
+- ** Smart Dump Sanitization**:
   - Automatically overrides dump-specific `USE database;` statements to target your chosen database.
   - Automatically strips external database qualifiers (e.g. `CREATE TABLE other_db.users` &rarr; `users`).
   - Supports `CREATE TABLE`, `CREATE VIEW`, `DELIMITER` blocks, triggers, and stored procedures.
   - Temporarily disables `FOREIGN_KEY_CHECKS` and `UNIQUE_CHECKS` during import so foreign key table order doesn't cause errors.
-- **📊 Table Browser & Error Inspector**:
+- ** Table Browser & Error Inspector**:
   - Filter and search through all created tables and views.
   - Click any table badge to quickly copy its name.
   - Detailed error inspector with SQL snippet preview and "Copy All" button.
   - Export a complete import summary report (`.txt`).
-# sql-importer
